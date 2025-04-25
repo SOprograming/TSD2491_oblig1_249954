@@ -1,0 +1,193 @@
+@model List<TSD2491_OBLIG1_249954.Models.Bruker>
+
+@{
+    ViewData["Title"] = "Spillet: 2-Like";
+    var brukernavn = ViewData["bruker"] as string ?? "";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 20px auto;
+        }
+        td {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #000;
+            cursor: pointer;
+        }
+        .counter, .message {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+         .submitButton:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+        .input-group .form-select {
+            margin-right: 10px;
+        }
+        .input-group .btn {
+            padding: 5px 10px;
+        }
+        .table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .table th, .table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .table tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        <table id="colorTable"></table>
+        <div class="counter">Antall celler fjernet: <span id="removedCount">0</span></div>
+        <div class="message" id="gameMessage"></div> 
+        
+    </div>
+
+    <div id="registrationForm">
+        @using (Html.BeginForm("RegistrereBruker", "Bruker", FormMethod.Post))
+        {
+            <label for="brukerInput"></label>
+            <input type="input" name="navn" id="brukerInput" />
+            <input type="submit" value="Registrere bruker" class="submitButton"/>
+        }
+    </div>
+
+     <div id="aktiv-bruker"></div>
+        @if (brukernavn != null)
+        {
+            <h2>Aktiv bruker: @brukernavn </h2>
+        }
+    </div>
+
+    <div>
+        @using (Html.BeginForm("OppdaterAntallSpill", "Bruker", FormMethod.Post))
+        {
+            <input type="hidden" name="navn" value="@brukernavn" id="hiddenNavnInput" />
+            <input type="submit" value="Oppdater antall spill for @brukernavn" class="submitButton" id="submitButton" disabled />
+        }
+    </div>
+
+    <div>
+        <div class="col-md-4">
+            <h4>Brukere med flest spill fullført: </h4>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Nummer</th>
+                        <th>Navn</th>
+                        <th>Antall Spill</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@Model[i].Navn</td>
+                            <td>@Model[i].AntallSpill</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+    <!--Prekode for oblig#1 dvs. spillet; 2-like...-->
+    <!--Det er også mulig å implementer spillet med egen kode...-->
+    <script>
+        const colors = ["red", "red", "blue", "blue", "yellow", "yellow", "green", "green", "purple", "purple", "orange", "orange", "pink", "pink", "cyan", "cyan"];
+        const table = document.getElementById("colorTable");
+        const removedCountElement = document.getElementById("removedCount");
+        const gameMessageElement = document.getElementById("gameMessage");
+        
+        let firstClickedCell = null;
+        let removedCount = 0;
+
+        let isFlagSet = false;
+
+        // Function to shuffle the colors array
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Function to initialize the table
+        function initializeTable() {
+            table.innerHTML = "";
+            shuffle(colors);
+            let colorIndex = 0;
+            for (let i = 0; i < 4; i++) {
+                const row = document.createElement("tr");
+                for (let j = 0; j < 4; j++) {
+                    const cell = document.createElement("td");
+                    cell.style.backgroundColor = colors[colorIndex++];
+                    cell.addEventListener("click", handleCellClick);
+                    row.appendChild(cell);
+                }
+                table.appendChild(row);
+            }
+        }
+
+        // Function to handle cell click
+        function handleCellClick(event) {
+            const cell = event.target;
+            if (firstClickedCell === null) {
+                firstClickedCell = cell;
+                cell.style.outline = "2px solid black"; // Mark the first clicked cell
+            } else {
+                if (firstClickedCell.style.backgroundColor === cell.style.backgroundColor) {
+                    firstClickedCell.style.backgroundColor = "transparent";
+                    cell.style.backgroundColor = "transparent";
+                    removedCount += 2;
+                    removedCountElement.textContent = removedCount;
+                    if (removedCount === 16) {
+                        gameMessageElement.textContent = "Spillet er ferdig!";
+                        $('#submitButton').prop('disabled', false); // Aktiver knappen for oppdater antall spill, etter et spill er ferdig.
+                    }
+
+                    
+                }
+                firstClickedCell.style.outline = "none"; // Remove the outline
+                firstClickedCell = null;
+            }
+        }
+
+        // Initialize the table on page load
+        initializeTable();
+    </script>
+</body>
+</html>

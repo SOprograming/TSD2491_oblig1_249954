@@ -1,0 +1,46 @@
+@model IEnumerable<TSD2491_OBLIG1_249954.Models.Bruker>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>BrukerAdministrasjon</h1>
+
+<p>
+    <a asp-action="Create">Lag ny bruker</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Navn)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AntallSpill) Fullført
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.KontaktInfo)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Navn)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AntallSpill) 
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.KontaktInfo)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ID">Redigere</a> |
+                <a asp-action="Delete" asp-route-id="@item.ID">Slette</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
